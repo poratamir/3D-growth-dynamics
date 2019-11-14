@@ -34,7 +34,7 @@ class ORGAN:    #contains information about the centerline
                 self.D[:,:,ind]=np.matmul(expm(self.ds*U),self.D[:,:,ind-1])  #Rotation of the local coordinates using the Rodrigues formula
                 self.r[:,ind]=self.r[:,ind-1]+self.ds*self.D[:,2,ind-1]       #centerline update
                                 
-    def growth(self):   #increasing the length by one vertebra
+    def growth(self):   #increasing the length by one segment
         self.kappa=np.append(self.kappa,0.0*np.ones((1,)))
         self.phi=np.append(self.phi,0.0*np.ones((1,)))
         self.tau=np.append(self.tau,0.0*np.ones((1,)))
