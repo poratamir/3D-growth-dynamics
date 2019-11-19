@@ -53,7 +53,7 @@ for i in range(0,T):
     #to prevent fast rotations of the base due to misalignement. Should fit the
     #differential growth vector at the base.
     if i==0:
-        organ.initial_rotation(Delta[:,0])     omega=0.1
+        organ.initial_rotation(Delta[:,0])
     organ.update(Delta,V,E,dt)
 ###################
 #plotting final form:    
