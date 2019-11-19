@@ -23,19 +23,37 @@ V=np.linspace(0,Vmax-E*ds,NUM)        #Velocity of growth zone
 organ=OR.ORGAN(NUM,NUM_gz,ds,R)       #define organ
 
 ###################
-#turning the initial coordinate system according to a given vector, 
-#to prevent fast rotations of the base due to misalignement. Should fit the
-#differential growth vector at the base.
-organ.initial_rotation(np.array([1.0,0.0,0.0])) 
-###################
 #propagate in time:    
 for i in range(0,T):
     print(i)
     organ.growth() #Growing one segment
-    #model for local differental growth vectors: the size of the array should be (3,NUM):
-    omega=0.1
-    Delta = Z*gamma*(np.tile(np.array([1.0,0.0,0.0]),(organ.NUM,1)).transpose())-gamma*organ.kappa*organ.D[:,0,:]+(R*omega/E) * organ.kappa*organ.D[:,1,:]
+    #########################
+    #Configuration of the model for local differental growth vectors:
+    omega=0.1                               #Plant Circumnutations' angular frequency
+    Vec_Tropism=np.array([1.0,1.0,0.0])     #Direction of constant directional tropism
+    n_trop=Vec_Tropism/np.sqrt(Vec_Tropism[0]**2+Vec_Tropism[1]**2+Vec_Tropism[2]**2) #Direction of constant directional tropism
+    r_p=np.array([1.0,1.0,1.0])             #Location of attracting point for an attracting point tropism
+    kappa_0 =0.1                            #non-zero intrinsic curvature
+    ########################
+    #Local sensing terms (the shape of the array should be (3,NUM)):
+    Delta_constant_tropism = Z*gamma*np.tile(n_trop,(organ.NUM,1)).transpose()   #projection to the N-direction is performed in the update function
+    Delta_circumnutations = (R*omega/E) * organ.kappa*organ.D[:,1,:]
+    Delta_proprioception = -gamma*organ.kappa*organ.D[:,0,:]
+    Delta_intrinsic_curvature = kappa_0*gamma*organ.D[:,0,:]
+    r_diff = np.tile(r_p,(organ.NUM,1)).transpose()-organ.r              
+    n_diff=np.zeros(np.shape(r_diff))
+    for n in range(0,organ.NUM):
+        n_diff[:,n]=r_diff[:,n]/np.sqrt(r_diff[0,n]**2+r_diff[1,n]**2+r_diff[2,n]**2)
+    Delta_point_tropism = Z*gamma*n_diff #projection to the N-direction is performed in the update function
+    #setting the differential growth vector:
+    Delta = Delta_constant_tropism + Delta_circumnutations + Delta_proprioception + Delta_intrinsic_curvature
+    #########################
     #updating organ:
+    #First, we turn the initial coordinate system according to a given vector, 
+    #to prevent fast rotations of the base due to misalignement. Should fit the
+    #differential growth vector at the base.
+    if i==0:
+        organ.initial_rotation(Delta[:,0])     omega=0.1
     organ.update(Delta,V,E,dt)
 ###################
 #plotting final form:    
