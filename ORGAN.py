@@ -17,30 +17,30 @@ class ORGAN:    #contains information about the centerline
         self.NUM_gz=NUM_gz                   #Number of segments in the growth-zone
         self.ds=ds                           #segment length
         self.R=R                             #organ's radius
-        #Centerline initialization:
+        #centerline initializtion:
         self.D[:,:,0]=np.array([[1,0,0],[0,1,0],[0,0,1]])
-        for n in range(0,NUM):
-            if n:
-                U=self.Darboux_Matrix(n-1)                                  #Darboux skew-symmetric matrix
-                self.D[:,:,n]=np.matmul(expm(self.ds*U),self.D[:,:,n-1])    #Rotation of the base using the Rodrigues formula
-                self.r[:,n]=self.r[:,n-1]+ds*self.D[:,2,n-1]                #location update 
+        self.Update_centerline()
+
    
     def Darboux_Matrix(self,ind):   #calculation of the Darboux skew-symmetric matrix in the local coordinate system
         return np.matmul(np.matmul(self.D[:,:,ind],np.array([[0,-self.tau[ind],self.kappa[ind]],[self.tau[ind],0,0],[-self.kappa[ind],0,0]])),self.D[:,:,ind].transpose())
     
+    def Update_centerline(self):
+        for ind in range(1,self.NUM):       #propgation in arc length
+            U=self.Darboux_Matrix(ind-1)      #Darboux skew-symmetric matrix
+            self.D[:,:,ind]=np.matmul(expm(self.ds*U),self.D[:,:,ind-1])  #Rotation of the local coordinates using the Rodrigues formula
+            self.r[:,ind]=self.r[:,ind-1]+self.ds*self.D[:,2,ind-1]       #centerline update
+
+        
     def initial_rotation(self,vec):   #turning the initial coordinate system according to a given vector
         VEC=vec
         VEC[2]=0                                             #projection to the (N,B) plane
         VEC=VEC/np.sqrt(VEC[0]**2+VEC[1]**2)                 #normalization
         self.D[:,:,0]=np.array([[1,0,0],[0,1,0],[0,0,1]])    #inital base's unit vectors
         self.D[:,:,0]=np.matmul(expm(np.arccos(VEC[0])*np.array([[0,-1,0],[1,0,0],[0,0,0]])),self.D[:,:,0]) #Rotation of the base using the Rodrigues formula
-        for ind in range(0,self.NUM):       #propgation in arc length
-            if ind:
-                U=self.Darboux_Matrix(ind-1)      #Darboux skew-symmetric matrix
-                self.D[:,:,ind]=np.matmul(expm(self.ds*U),self.D[:,:,ind-1])  #Rotation of the local coordinates using the Rodrigues formula
-                self.r[:,ind]=self.r[:,ind-1]+self.ds*self.D[:,2,ind-1]       #centerline update
+        self.Update_centerline()
                                 
-    def growth(self):   #increasing the length by one segment
+    def growth(self):   #increasing the length by one vertebra
         self.kappa=np.append(self.kappa,0.0*np.ones((1,)))
         self.phi=np.append(self.phi,0.0*np.ones((1,)))
         self.tau=np.append(self.tau,0.0*np.ones((1,)))
@@ -73,11 +73,8 @@ class ORGAN:    #contains information about the centerline
                 if self.phi[n]<1e-12: #avoiding numerical errors:
                     self.phi[n]=0.0
                 self.tau[n]=(self.phi[n]-self.phi[n-1])/self.ds #calculation of torsion
-            #update of the local coordinate systems:           
-            if n:
-                U=self.Darboux_Matrix(n-1)
-                self.D[:,:,n]=np.matmul(expm(self.ds*U),self.D[:,:,n-1]) #the turn - Rodrigues formula
-                self.r[:,n]=self.r[:,n-1]+self.ds*self.D[:,2,n-1] #location upadte - for space dependent stimuli
+        #update of the local coordinate systems:           
+        self.Update_centerline()
 
 
     def plot_organ(self): #Plotting
