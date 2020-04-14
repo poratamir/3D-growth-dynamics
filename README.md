@@ -1,5 +1,7 @@
-Main.py is the main code, it requires ORGAN_class.py to run. 
+Welcome!
 
-To run a simulation, define the growth variables and pick a scenario according to the desired differential growth vector ("Delta" in the code).
+main.py is the main code, it requires ORGAN_class.py to run. 
 
-Then, choose a name and a location for a file, and an animation will be created.
+To run a simulation, define the growth variables in main.py and pick a scenario according to the desired differential growth vector ("Delta" in the main.py).
+
+Then, choose a name and a location for a file at the bottom of main.py, and an animation will be created.
