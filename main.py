@@ -91,7 +91,7 @@ def growth_timestep(i):
 ###################
 #saving animation output: 
 NAME="NAME"
-NAME_tot="C:\\Users\\amirp\\Documents\\Python Scripts\\3D dynamics\\new_anim_april\\" + NAME
+NAME_tot="C:\\Users\\" + NAME
 def init():
     return []
 anim = animation.FuncAnimation(fig, growth_timestep, init_func=init,frames=T, interval=30, blit=True)
