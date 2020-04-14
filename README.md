@@ -1,3 +1,3 @@
-# 3D-growth-dynamics
-# ORGAN.py contains the maic class and functions
-# 3D_dynamics runs the dynamics based on a given model for the differential growth vector
+Main.py is the main code, it requires ORGAN_class.py.
+To run a simulation, pick a scenario according to the desired differential growth vector ("Delta" in the code).
+Then, choose a name and a location for a file, and an animation will be created as that file.
