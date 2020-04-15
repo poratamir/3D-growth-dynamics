@@ -8,7 +8,7 @@ import matplotlib.animation as animation
 #Organ class:
 import ORGAN_class as OR
 ###############################
-#Varables:
+#Variables:
 T=300                  #Number of timesteps 
 dt=0.1                 #timestep
 ds=0.01                #segment length
@@ -18,15 +18,17 @@ gamma=0.1              #proprioception constant
 lambda0=10*gamma       #tropic sensitivity0                
 lambda1=5*gamma        #tropic sensitivity1                
 ################################
-#Initialization:
+#Growth profile:
 L_gz=L0                               #apical growth-zone length - equals to inital length 
-E=ds/dt/L_gz                          #constant growth rate - one segment each timestep
+E=ds/dt/L_gz                          #constant growth rate - adding one segment each timestep
 NUM=int(L0/ds)                        #number of segments
 NUM_gz=int(L_gz/ds)                   #number of segments in the growth zone
 Vmax=E*NUM_gz*ds                      #apex' velocity
 V=np.linspace(0,Vmax-E*ds,NUM)        #Velocity of growth zone
+################################
 organ=OR.ORGAN(NUM,NUM_gz,ds,R)       #define organ
-
+################################
+#plotting:
 fig = plt.figure(figsize=(6,4),dpi=200,constrained_layout=False)
 plot_arrow=0
 plot_line=0
@@ -60,7 +62,7 @@ def growth_timestep(i):
     Delta_point_tropism = lambda0*n_diff           #projection to the cross-section plane is performed in the update function
     plot_point=1
     #########################
-    #Twining:
+    #Line tropism:
     r_rod=np.array([0.0,0.3,0.0])                   #Location of an attracting line for twining
     r_rod=np.tile(r_rod,(organ.NUM,1)).transpose()
     n_rod=np.array([1.0,0.0,1.0])/np.sqrt(2)        #Direction of attracting line for twining
@@ -69,7 +71,7 @@ def growth_timestep(i):
     rho=organ.r-r_rod
     rho=rho-n_rod*(rho[0,:]*n_rod[0,:]+rho[1,:]*n_rod[1,:]+rho[2,:]*n_rod[2,:])
     rho=np.divide(rho,np.sqrt(rho[0,:]**2+rho[1,:]**2+rho[2,:]**2))
-    Delta_twining = lambda0*n_trop2 -lambda1*rho
+    Delta_line = lambda0*n_trop2 -lambda1*rho
     plot_line=1
     #########################
     #Circumnutation:
@@ -80,7 +82,7 @@ def growth_timestep(i):
     #setting the differential growth vector (choose scenario):
     Delta = Delta_constant_tropism + Delta_proprioception
     Delta = Delta_point_tropism    + Delta_proprioception
-    Delta = Delta_twining          + Delta_proprioception
+    Delta = Delta_line             + Delta_proprioception
     Delta = Delta_circumnutations  + Delta_proprioception
     Delta = Delta_constant_tropism + Delta_circumnutations + Delta_proprioception
     #########################
