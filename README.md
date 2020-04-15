@@ -7,5 +7,6 @@ To run a simulation, define the growth variables in main.py and pick a scenario 
 The simulation produces an animation. To save it, choose a name and a location for a file at the bottom of main.py.
 
 
-Amir Porat, Yasmine Meroz 
+Amir Porat, Yasmine Meroz
+
 April 2020
