@@ -22,16 +22,16 @@ class ORGAN:    #contains information about the centerline
         self.Update_centerline()
         
    
-    def Darboux_Matrix(self,ind):   #calculation of the Darboux skew-symmetric matrix in the local coordinate system
+    def Darboux_Matrix(self,ind):   #calculation of the Darboux skew-symmetric matrix in the lab frame
         return np.matmul(np.matmul(self.D[:,:,ind],np.array([[0.0,0.0,self.k1[ind]],[0,0,self.k2[ind]],[-self.k1[ind],-self.k2[ind],0]])),self.D[:,:,ind].transpose())
     
     def Update_centerline(self):
         for ind in range(1,self.NUM):       #propgation in arc length
             U=self.Darboux_Matrix(ind-1)      #Darboux skew-symmetric matrix
             self.D[:,:,ind]=np.matmul(expm(self.ds*U),self.D[:,:,ind-1])  #Rotation of the local coordinates using the Rodrigues formula
-            self.r[:,ind]=self.r[:,ind-1]+self.ds*self.D[:,2,ind-1]       #centerline update
-        self.phi=np.arctan2(self.k2,self.k1)
-        self.kappa=np.sqrt(self.k2**2+self.k1**2)
+            self.r[:,ind]=self.r[:,ind-1]+self.ds*self.D[:,2,ind-1]       #centerline position update
+        self.phi=np.arctan2(self.k2,self.k1)            #total curvature
+        self.kappa=np.sqrt(self.k2**2+self.k1**2)       #The twist angle
         #normal and bi-normal directions:
         self.N=self.D[:,0,:]*np.cos(self.phi)+self.D[:,1,:]*np.sin(self.phi)
         self.B=self.D[:,0,:]*(-np.sin(self.phi))+self.D[:,1,:]*np.cos(self.phi)
@@ -64,14 +64,14 @@ class ORGAN:    #contains information about the centerline
                 #time step t:
                 v=V[q] #velocity of arc-length
                 q+=1
-                k1_t=(E/self.R)*np.dot(Delta[:,n],self.D[:,0,n])-v*(self.k1[n]-self.k1[n-1])/self.ds  #calculation of curvature's dynamics
-                k2_t=(E/self.R)*np.dot(Delta[:,n],self.D[:,1,n])-v*(self.k2[n]-self.k2[n-1])/self.ds  #calculation of curvature's dynamics
+                k1_t=(E/self.R)*np.dot(Delta[:,n],self.D[:,0,n])-v*(self.k1[n]-self.k1[n-1])/self.ds  #curvature's dynamics
+                k2_t=(E/self.R)*np.dot(Delta[:,n],self.D[:,1,n])-v*(self.k2[n]-self.k2[n-1])/self.ds  #curvature's dynamics
                 if (np.abs(k1_t)<1e-12): #numerical error threshold
                     k1_t=0.0
                 if (np.abs(k2_t)<1e-12): #numerical error threshold
                     k2_t=0.0
-                self.k1[n]=self.k1[n]+dt*k1_t
-                self.k2[n]=self.k2[n]+dt*k2_t
+                self.k1[n]=self.k1[n]+dt*k1_t   #updating curvature
+                self.k2[n]=self.k2[n]+dt*k2_t   #updating curvature
         #update of the local coordinate systems:           
         self.Update_centerline()
 
